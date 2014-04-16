@@ -12,7 +12,7 @@ This is a small overview about what the script prints out:
 
 root@honeypot:~# perl glastopf-analytics.pl
 
-* * * * * * * * * * * * * * * * * * * * * * * * * * * *
+`* * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Glastopf Analytics :: easy honeypot statistics v1.0 *
 *  Kamil Vavra; www.xexexe.cz; vavkamil(at)gmail.com  *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,4 +25,4 @@ root@honeypot:~# perl glastopf-analytics.pl
 * 4) Show top 10 event patterns
 * 5) exit
 *
-* Enter number of your choice (1-5):
+* Enter number of your choice (1-5):`
