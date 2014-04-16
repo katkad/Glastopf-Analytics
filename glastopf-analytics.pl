@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # Glastopf Analytics v1.0
-# Author: Kamil Vavra (www.xexexe.cz)
+# Author: Kamil Vavra (http://www.xexexe.cz)
 # Credits to Johannes Schroeter (http://devwerks.net/en/research/tools/)
 
 use strict;
@@ -12,12 +12,27 @@ use Geo::IP;
 
 my $dbname = "/opt/myhoneypot/db/glastopf.db";
 
-my $dbh = DBI->connect(          
-    "dbi:SQLite:dbname=$dbname",               
-    { RaiseError => 1 } 
+my $dbh = DBI->connect(
+    "dbi:SQLite:dbname=$dbname",
+    { RaiseError => 1 }
 ) or die $DBI::errstr;
 
-    until ( my $todo ) {                   
+our @names = (
+    "events",
+    "countries",
+    "user-agents",
+    "event patterns"
+);
+
+our @functions = (
+    sub { return last_ten_events() },
+    sub { return top_ten_countries() },
+    sub { return top_ten_agents() },
+    sub { return top_ten_patterns() },
+    sub { quit(); }
+);
+
+while(1) {
     header();
     print "* What to do?\n";
     print "* * * * * * *\n";
@@ -25,57 +40,39 @@ my $dbh = DBI->connect(
     print "* 1) Show last 10 events\n";
     print "* 2) Show top 10 countries\n";
     print "* 3) Show top 10 user-agents\n";
-    print "* 4) Show top 10 event patterns\n"; 
+    print "* 4) Show top 10 event patterns\n";
     print "* 5) exit\n*\n";
 
     print "* Enter number of your choice (1-5): ";
     chomp( my $input = <> );
 
-    if ( $input eq "1" ) {
-    header();
-    print "* Show last 10 events\n";
-    print "* * * * * * * * * * *\n*\n";
-    last_ten_events(); 
-    press_any_key();     
-    }    
-    elsif ( $input eq "2" ) {
-    header();
-    print "* Show top 10 countries\n";
-    print "* * * * * * * * * * * *\n*\n";
-    top_ten_countries();
-    press_any_key();                
+    if ($input-- !~ /\D/ && 0 <= $input && $input <  scalar(@functions)) {
+        show($input);
+    } else {
+        print "\n* Whaat? Try again:";
     }
-    elsif ( $input eq "3" ) {
-    header();
-    print "* Show top 10 user-agents\n";
-    print "* * * * * * * * * * * * *\n*\n";
-    top_ten_agents();
-    press_any_key();                      
+}
+
+sub show {
+    my $what = shift();
+    my $which = $what ? "top" : "last"; # if choice is 1, it's `last`
+
+    if ($what < scalar(@names)) {
+        header();
+        print "* Show ".$which." 10 ".$names[$what]."\n";
+        print "* * * * * * * * * * *\n*\n";
     }
-    elsif ( $input eq "4" ) {
-    system("clear");
-    print "* Show top 10 event patterns\n";
-    print "* * * * * * * * * * * * * * *\n*\n";
-    top_ten_patterns();
-    press_any_key();                   
-    }
-    elsif ( $input eq "5" ) {
-    system("clear");
-    print "\n* Press any key to continue.";
-    <>;
-    system("clear");                     
-    }
-    elsif ( $input eq "6" ) {
+
+    $functions[$what]();
+    press_any_key();
+}
+
+sub quit {
     header();
     print "* You are awesome - thank you\n";
     print "* * * * * * * * * * * * * * *\n\n";
-    last;   
-    }                      
-    else {
-    print "\n* Whaat? Try again:";                
-    } 
+    exit(0);
 }
-$dbh->disconnect();
 
 sub header {
     system("clear");
@@ -86,18 +83,20 @@ sub header {
 }
 
 sub press_any_key {
+    system("clear");
     print "*\n* Press any key to continue.";
     <>;
+    system("clear");
 }
 
 sub last_ten_events {
-    my $sth = $dbh->prepare( "SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT 10" );  
+    my $sth = $dbh->prepare( "SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT 10" );
     $sth->execute();
 
     while (my @data = $sth->fetchrow_array()) {
-        my $time = $data[0]; 
-        my $request_url = $data[1]; 
-        my $source_ip = $data[2]; 
+        my $time = $data[0];
+        my $request_url = $data[1];
+        my $source_ip = $data[2];
         my $gi = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country = $gi->country_name_by_addr($source_ip);
         printf ("* %-22s %-17s %-15.25s %s\n", $time, $source_ip, $country, $request_url);
@@ -106,7 +105,7 @@ $sth->finish();
 }
 
 sub top_ten_countries {
-    my $sth = $dbh->prepare( "SELECT SUBSTR(source,-20,14) FROM events" );  
+    my $sth = $dbh->prepare( "SELECT SUBSTR(source,-20,14) FROM events" );
     $sth->execute();
 
     my %countries;
@@ -132,11 +131,11 @@ sub top_ten_countries {
 
 sub top_ten_agents {
     my %seen = ();
-    my $sth = $dbh->prepare( "SELECT request_raw FROM events" );  
+    my $sth = $dbh->prepare( "SELECT request_raw FROM events" );
     $sth->execute();
 
     while (my @data = $sth->fetchrow_array()) {
-        my $request_raw  = $data[0]; 
+        my $request_raw  = $data[0];
         if ($request_raw =~ /User-Agent: (.*?)$/m) {
             my $user_agent = $1;
             $seen{$user_agent}{count}++;
@@ -153,13 +152,17 @@ sub top_ten_agents {
 }
 
 sub top_ten_patterns {
-    my $sth = $dbh->prepare( "SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) desc LIMIT 10" );  
+    my $sth = $dbh->prepare( "SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) desc LIMIT 10" );
     $sth->execute();
 
     while (my @data = $sth->fetchrow_array()) {
         my $count = $data[0];
-        my $pattern = $data[1];  
-        printf ("* %6d %s\n", $count, $pattern); 
+        my $pattern = $data[1];
+        printf ("* %6d %s\n", $count, $pattern);
     }
 $sth->finish();
+}
+
+END {
+    $dbh->disconnect() if $dbh;
 }
