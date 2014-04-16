@@ -2,7 +2,9 @@
 
 # Glastopf Analytics v1.0
 # Author: Kamil Vavra (http://www.xexexe.cz)
-# Credits to Johannes Schroeter (http://devwerks.net/en/research/tools/)
+# Credits to: 
+# Thyrst' (https://www.github.com/Thyrst)
+# Johannes Schroeter (http://devwerks.net/en/research/tools/)
 
 use strict;
 use warnings;
@@ -21,7 +23,8 @@ our @names = (
     "events",
     "countries",
     "user-agents",
-    "event patterns"
+    "event patterns",
+    "requested filetypes"
 );
 
 our @functions = (
@@ -29,27 +32,26 @@ our @functions = (
     sub { return top_ten_countries() },
     sub { return top_ten_agents() },
     sub { return top_ten_patterns() },
+    sub { return top_ten_filetypes() },
     sub { quit(); }
 );
 
 while(1) {
     header();
     print "* What to do?\n";
-    print "* * * * * * *\n";
     print "*\n";
     print "* 1) Show last 10 events\n";
     print "* 2) Show top 10 countries\n";
     print "* 3) Show top 10 user-agents\n";
     print "* 4) Show top 10 event patterns\n";
-    print "* 5) exit\n*\n";
+    print "* 5) Show top 10 requested filetypes\n";
+    print "* 6) Exit\n*\n";
 
-    print "* Enter number of your choice (1-5): ";
+    print "* Enter number of your choice (1-6): ";
     chomp( my $input = <> );
 
     if ($input-- !~ /\D/ && 0 <= $input && $input <  scalar(@functions)) {
         show($input);
-    } else {
-        print "\n* Whaat? Try again:";
     }
 }
 
@@ -59,8 +61,8 @@ sub show {
 
     if ($what < scalar(@names)) {
         header();
-        print "* Show ".$which." 10 ".$names[$what]."\n";
-        print "* * * * * * * * * * *\n*\n";
+        print "* Show ".$which." 10 ".$names[$what].":\n";
+        print "*\n";
     }
 
     $functions[$what]();
@@ -69,8 +71,8 @@ sub show {
 
 sub quit {
     header();
-    print "* You are awesome - thank you\n";
-    print "* * * * * * * * * * * * * * *\n\n";
+    print "* You are awesome - thank you *\n";
+    print "* * * * * * * * * * * * * * * *\n\n";
     exit(0);
 }
 
@@ -83,10 +85,8 @@ sub header {
 }
 
 sub press_any_key {
-    system("clear");
     print "*\n* Press any key to continue.";
     <>;
-    system("clear");
 }
 
 sub last_ten_events {
@@ -99,7 +99,7 @@ sub last_ten_events {
         my $source_ip = $data[2];
         my $gi = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country = $gi->country_name_by_addr($source_ip);
-        printf ("* %-22s %-17s %-15.25s %s\n", $time, $source_ip, $country, $request_url);
+        printf ("* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url);
     }
 $sth->finish();
 }
@@ -152,13 +152,25 @@ sub top_ten_agents {
 }
 
 sub top_ten_patterns {
-    my $sth = $dbh->prepare( "SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) desc LIMIT 10" );
+    my $sth = $dbh->prepare( "SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT 10" );
     $sth->execute();
 
     while (my @data = $sth->fetchrow_array()) {
         my $count = $data[0];
         my $pattern = $data[1];
         printf ("* %6d %s\n", $count, $pattern);
+    }
+$sth->finish();
+}
+
+sub top_ten_filetypes {
+    my $sth = $dbh->prepare( "SELECT count, content FROM filetype ORDER BY count DESC LIMIT 10" );
+    $sth->execute();
+
+    while (my @data = $sth->fetchrow_array()) {
+        my $count = $data[0];
+        my $filetype = $data[1];
+        printf ("* %6d %s\n", $count, $filetype);
     }
 $sth->finish();
 }
