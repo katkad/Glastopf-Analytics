@@ -19,12 +19,14 @@ my $dbh = DBI->connect(
     { RaiseError => 1 }
 ) or die $DBI::errstr;
 
-our @names = (
-    "events",
-    "countries",
-    "user-agents",
-    "event patterns",
-    "requested filetypes"
+our @responses = (
+    "* Show last 10 events:\n*\n",
+    "* Show top 10 countries:\n*\n",
+    "* Show top 10 user-agents:\n*\n",
+    "* Show top 10 event patterns:\n*\n",
+    "* Show top 10 requested filetypes:\n*\n",
+    "* You are awesome - thank you *\n".
+    "* * * * * * * * * * * * * * * *\n\n"
 );
 
 our @functions = (
@@ -33,7 +35,7 @@ our @functions = (
     sub { return top_ten_agents() },
     sub { return top_ten_patterns() },
     sub { return top_ten_filetypes() },
-    sub { quit(); }
+    sub { exit(0); }
 );
 
 while(1) {
@@ -57,23 +59,12 @@ while(1) {
 
 sub show {
     my $what = shift();
-    my $which = $what ? "top" : "last"; # if choice is 1, it's `last`
 
-    if ($what < scalar(@names)) {
-        header();
-        print "* Show ".$which." 10 ".$names[$what].":\n";
-        print "*\n";
-    }
-
+    header();
+    print $responses[$what] if $responses[$what];
+    
     $functions[$what]();
     press_any_key();
-}
-
-sub quit {
-    header();
-    print "* You are awesome - thank you *\n";
-    print "* * * * * * * * * * * * * * * *\n\n";
-    exit(0);
 }
 
 sub header {
