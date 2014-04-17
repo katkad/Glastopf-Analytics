@@ -25,6 +25,9 @@ our @responses = (
     "* Show top 10 user-agents:\n*\n",
     "* Show top 10 event patterns:\n*\n",
     "* Show top 10 requested filetypes:\n*\n",
+    "* Show top 10 attackers:\n*\n",
+    "*  Kamil Vavra; www.xexexe.cz; vavkamil(at)gmail.com  *\n".
+    "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n".
     "* You are awesome - thank you *\n".
     "* * * * * * * * * * * * * * * *\n\n"
 );
@@ -35,6 +38,7 @@ our @functions = (
     sub { return top_ten_agents() },
     sub { return top_ten_patterns() },
     sub { return top_ten_filetypes() },
+    sub { return top_ten_attackers() },
     sub { exit(0); }
 );
 
@@ -47,12 +51,13 @@ while(1) {
     print "* 3) Show top 10 user-agents\n";
     print "* 4) Show top 10 event patterns\n";
     print "* 5) Show top 10 requested filetypes\n";
-    print "* 6) Exit\n*\n";
+    print "* 6) Show top 10 attackers\n";
+    print "* 7) Exit\n*\n";
 
-    print "* Enter number of your choice (1-6): ";
+    print "* Enter number of your choice (1-7): ";
     chomp( my $input = <> );
 
-    if ($input-- !~ /\D/ && 0 <= $input && $input <  scalar(@functions)) {
+    if ( $input-- !~ /\D/ && 0 <= $input && $input < scalar(@functions) ) {
         show($input);
     }
 }
@@ -71,7 +76,6 @@ sub header {
     system("clear");
     print "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     print "* Glastopf Analytics :: easy honeypot statistics v1.0 *\n";
-    print "*  Kamil Vavra; www.xexexe.cz; vavkamil(at)gmail.com  *\n";
     print "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 }
 
@@ -81,61 +85,62 @@ sub press_any_key {
 }
 
 sub last_ten_events {
-    my $sth = $dbh->prepare( "SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT 10" );
+    my $sth = $dbh->prepare("SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT 10");
     $sth->execute();
 
-    while (my @data = $sth->fetchrow_array()) {
-        my $time = $data[0];
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $time        = $data[0];
         my $request_url = $data[1];
-        my $source_ip = $data[2];
-        my $gi = Geo::IP->new(GEOIP_MEMORY_CACHE);
-        my $country = $gi->country_name_by_addr($source_ip);
-        printf ("* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url);
+        my $source_ip   = $data[2];
+        my $gi          = Geo::IP->new(GEOIP_MEMORY_CACHE);
+        my $country     = $gi->country_name_by_addr($source_ip);
+        printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
     }
-$sth->finish();
+    $sth->finish();
 }
 
 sub top_ten_countries {
-    my $sth = $dbh->prepare( "SELECT SUBSTR(source,-20,14) FROM events" );
+    my $sth = $dbh->prepare("SELECT SUBSTR(source,-20,14) FROM events");
     $sth->execute();
 
     my %countries;
-    while (my @data = $sth->fetchrow_array()) {
+    while ( my @data = $sth->fetchrow_array() ) {
         my $source_ip = $data[0];
-        my $gi = Geo::IP->new(GEOIP_MEMORY_CACHE);
-        my $country = $gi->country_name_by_addr( $source_ip );
-        if (defined($country)) {
-            $countries{ $country }++;
-        } else {
+        my $gi        = Geo::IP->new(GEOIP_MEMORY_CACHE);
+        my $country   = $gi->country_name_by_addr($source_ip);
+        if ( defined($country) ) {
+            $countries{$country}++;
+        }
+        else {
             $country = "Unknown";
-            $countries{ $country }++;
+            $countries{$country}++;
         }
     }
     $sth->finish();
     my $i = 0;
-    foreach my $source_ip ( sort { $countries{$b}<=> $countries{$a}; } keys %countries ) {
-        if($i == 10) { last(); }
-        printf "* %6d %s\n", $countries{ $source_ip }, $source_ip;
+    foreach my $source_ip ( sort { $countries{$b} <=> $countries{$a}; } keys %countries ) {
+        if ( $i == 10 ) { last(); }
+        printf "* %6d %s\n", $countries{$source_ip}, $source_ip;
         $i++;
     }
 }
 
 sub top_ten_agents {
     my %seen = ();
-    my $sth = $dbh->prepare( "SELECT request_raw FROM events" );
+    my $sth  = $dbh->prepare("SELECT request_raw FROM events");
     $sth->execute();
 
-    while (my @data = $sth->fetchrow_array()) {
-        my $request_raw  = $data[0];
-        if ($request_raw =~ /User-Agent: (.*?)$/m) {
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $request_raw = $data[0];
+        if ( $request_raw =~ /User-Agent: (.*?)$/m ) {
             my $user_agent = $1;
             $seen{$user_agent}{count}++;
             $seen{$user_agent}{agent} = $user_agent;
         }
     }
     my $i = 0;
-    for my $key ( sort {$seen{$b}->{count} <=> $seen{$a}->{count}} keys %seen ) {
-        if($i == 10) { last(); }
+    for my $key ( sort { $seen{$b}->{count} <=> $seen{$a}->{count} } keys %seen ) {
+        if ( $i == 10 ) { last(); }
         print "* $seen{$key}{count} events, $seen{$key}{agent}\n";
         $i++;
     }
@@ -143,27 +148,47 @@ sub top_ten_agents {
 }
 
 sub top_ten_patterns {
-    my $sth = $dbh->prepare( "SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT 10" );
+    my $sth = $dbh->prepare("SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT 10");
     $sth->execute();
 
-    while (my @data = $sth->fetchrow_array()) {
-        my $count = $data[0];
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $count   = $data[0];
         my $pattern = $data[1];
-        printf ("* %6d %s\n", $count, $pattern);
+        printf( "* %6d %s\n", $count, $pattern );
     }
-$sth->finish();
+    $sth->finish();
 }
 
 sub top_ten_filetypes {
-    my $sth = $dbh->prepare( "SELECT count, content FROM filetype ORDER BY count DESC LIMIT 10" );
+    my $sth = $dbh->prepare("SELECT count, content FROM filetype ORDER BY count DESC LIMIT 10");
     $sth->execute();
 
-    while (my @data = $sth->fetchrow_array()) {
-        my $count = $data[0];
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $count    = $data[0];
         my $filetype = $data[1];
-        printf ("* %6d %s\n", $count, $filetype);
+        printf( "* %6d %s\n", $count, $filetype );
     }
-$sth->finish();
+    $sth->finish();
+}
+
+sub top_ten_attackers {
+    my $sth = $dbh->prepare("SELECT COUNT(source), SUBSTR(source,-20,14) AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT 10");
+    $sth->execute();
+
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $count    = $data[0];
+        my $source_ip = $data[1];
+        my $gi        = Geo::IP->new(GEOIP_MEMORY_CACHE);
+        my $country   = $gi->country_name_by_addr($source_ip);
+        if ( defined($country) ) {
+            printf( "* %-05.10s %-17s %s\n", $count, $source_ip, $country );
+        }
+        else {
+            $country = "Unknown";
+            printf( "* %6d %-17s %s\n", $count, $source_ip, $country );
+        }
+    }
+    $sth->finish();
 }
 
 END {
