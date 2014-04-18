@@ -10,6 +10,7 @@ use strict;
 use warnings;
 
 use DBI;
+use Socket;
 use Geo::IP;
 
 my $dbname = "/opt/myhoneypot/db/glastopf.db";
@@ -94,12 +95,13 @@ sub last_ten_events {
         my $source_ip   = $data[2];
         my $gi          = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country     = $gi->country_name_by_addr($source_ip);
+        my $hostname  = gethostbyaddr( inet_aton($source_ip), AF_INET );
         if ( defined($country) ) {
-            printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
+            printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
         }
         else {
             $country = "Unknown";
-            printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
+            printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
         }
     }
     $sth->finish();
@@ -186,12 +188,13 @@ sub top_ten_attackers {
         my $source_ip = $data[1];
         my $gi        = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country   = $gi->country_name_by_addr($source_ip);
+        my $hostname  = gethostbyaddr( inet_aton($source_ip), AF_INET );
         if ( defined($country) ) {
-            printf( "* %-05.10s %-17s %s\n", $count, $source_ip, $country );
+            printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
         }
         else {
             $country = "Unknown";
-            printf( "* %6d %-17s %s\n", $count, $source_ip, $country );
+            printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
         }
     }
     $sth->finish();
