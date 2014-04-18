@@ -94,7 +94,13 @@ sub last_ten_events {
         my $source_ip   = $data[2];
         my $gi          = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country     = $gi->country_name_by_addr($source_ip);
-        printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
+        if ( defined($country) ) {
+            printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
+        }
+        else {
+            $country = "Unknown";
+            printf( "* %-22s %-17s %-20.25s %s\n", $time, $source_ip, $country, $request_url );
+        }
     }
     $sth->finish();
 }
