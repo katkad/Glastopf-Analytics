@@ -27,6 +27,7 @@ our @responses = (
     "* Show top 10 event patterns:\n*\n",
     "* Show top 10 requested filetypes:\n*\n",
     "* Show top 10 attackers:\n*\n",
+    "* Delete IP address from events:\n*\n",
     "*  Kamil Vavra; www.xexexe.cz; vavkamil(at)gmail.com  *\n".
     "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n".
     "* You are awesome - thank you *\n".
@@ -40,6 +41,7 @@ our @functions = (
     sub { return top_ten_patterns() },
     sub { return top_ten_filetypes() },
     sub { return top_ten_attackers() },
+    sub { return delete_events() },
     sub { exit(0); }
 );
 
@@ -53,9 +55,10 @@ while(1) {
     print "* 4) Show top 10 event patterns\n";
     print "* 5) Show top 10 requested filetypes\n";
     print "* 6) Show top 10 attackers\n";
-    print "* 7) Exit\n*\n";
+    print "* 7) Delete IP address from events\n";
+    print "* 8) Exit\n*\n";
 
-    print "* Enter number of your choice (1-7): ";
+    print "* Enter number of your choice (1-8): ";
     chomp( my $input = <> );
 
     if ( $input-- !~ /\D/ && 0 <= $input && $input < scalar(@functions) ) {
@@ -197,6 +200,16 @@ sub top_ten_attackers {
             printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
         }
     }
+    $sth->finish();
+}
+
+sub delete_events {
+	print "* Please enter source IP address: ";
+	my $source_ip = <>;
+	chomp ($source_ip);
+    my $sth = $dbh->prepare("DELETE FROM events WHERE SUBSTR(source,-20,14) = '$source_ip'");
+    $sth->execute();
+    print "* IP $source_ip successfully deleted from events.\n";
     $sth->finish();
 }
 
