@@ -24,7 +24,8 @@ root@honeypot:~# perl glastopf-analytics.pl
 * 4) Show top 10 event patterns
 * 5) Show top 10 requested filetypes
 * 6) Show top 10 attackers
-* 7) Exit
+* 7) Delete IP address from events
+* 8) Exit
 *
-* Enter number of your choice (1-7):
+* Enter number of your choice (1-8):
 ```
