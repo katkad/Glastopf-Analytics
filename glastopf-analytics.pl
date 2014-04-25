@@ -99,13 +99,19 @@ sub last_ten_events {
         my $gi          = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country     = $gi->country_name_by_addr($source_ip);
         my $hostname  = gethostbyaddr( inet_aton($source_ip), AF_INET );
+        if ( defined($hostname) ) {
+            # TODO: rewrite this
+        }
+        else {
+            $hostname = "Unknown";
+        }
         if ( defined($country) ) {
-            printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
+            # TODO: rewrite this
         }
         else {
             $country = "Unknown";
-            printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
         }
+        printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
     }
     $sth->finish();
 }
@@ -192,13 +198,19 @@ sub top_ten_attackers {
         my $gi        = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country   = $gi->country_name_by_addr($source_ip);
         my $hostname  = gethostbyaddr( inet_aton($source_ip), AF_INET );
+        if ( defined($hostname) ) {
+            # TODO: rewrite this
+        }
+        else {
+            $hostname = "Unknown";
+        }
         if ( defined($country) ) {
-            printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
+            # TODO: rewrite this
         }
         else {
             $country = "Unknown";
-            printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
         }
+        printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
     }
     $sth->finish();
 }
