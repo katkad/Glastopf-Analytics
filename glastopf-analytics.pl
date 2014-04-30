@@ -22,11 +22,13 @@ my $dbh = DBI->connect(
 
 our @responses = (
     "* Show last 10 events:\n*\n",
+    "* Show last 10 files:\n*\n",
     "* Show top 10 countries:\n*\n",
     "* Show top 10 user-agents:\n*\n",
     "* Show top 10 event patterns:\n*\n",
     "* Show top 10 requested filetypes:\n*\n",
     "* Show top 10 attackers:\n*\n",
+    "* Show top 10 files:\n*\n",
     "* Delete IP address from events:\n*\n",
     "*  Kamil Vavra; www.xexexe.cz; vavkamil(at)gmail.com  *\n".
     "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n".
@@ -36,11 +38,13 @@ our @responses = (
 
 our @functions = (
     sub { return last_ten_events() },
+    sub { return last_ten_files() },
     sub { return top_ten_countries() },
     sub { return top_ten_agents() },
     sub { return top_ten_patterns() },
     sub { return top_ten_filetypes() },
     sub { return top_ten_attackers() },
+    sub { return top_ten_files() },
     sub { return delete_events() },
     sub { exit(0); }
 );
@@ -50,15 +54,17 @@ while(1) {
     print "* What to do?\n";
     print "*\n";
     print "* 1) Show last 10 events\n";
-    print "* 2) Show top 10 countries\n";
-    print "* 3) Show top 10 user-agents\n";
-    print "* 4) Show top 10 event patterns\n";
-    print "* 5) Show top 10 requested filetypes\n";
-    print "* 6) Show top 10 attackers\n";
-    print "* 7) Delete IP address from events\n";
-    print "* 8) Exit\n*\n";
+    print "* 2) Show last 10 files\n";
+    print "* 3) Show top 10 countries\n";
+    print "* 4) Show top 10 user-agents\n";
+    print "* 5) Show top 10 event patterns\n";
+    print "* 6) Show top 10 requested filetypes\n";
+    print "* 7) Show top 10 attackers\n";
+    print "* 8) Show top 10 files\n";
+    print "* 9) Delete IP address from events\n";
+    print "* 10) Exit\n*\n";
 
-    print "* Enter number of your choice (1-8): ";
+    print "* Enter number of your choice (1-10): ";
     chomp( my $input = <> );
 
     if ( $input-- !~ /\D/ && 0 <= $input && $input < scalar(@functions) ) {
@@ -112,6 +118,18 @@ sub last_ten_events {
             $country = "Unknown";
         }
         printf( "* %-22s %-17s %-17.25s %-40s %s\n", $time, $source_ip, $country, $hostname, $request_url );
+    }
+    $sth->finish();
+}
+
+sub last_ten_files {
+    my $sth = $dbh->prepare("SELECT time, filename FROM events WHERE filename is not null ORDER BY time DESC LIMIT 10");
+    $sth->execute();
+
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $time = $data[0];
+        my $file = $data[1];
+        printf( "* %-22s %s\n", $time, $file );
     }
     $sth->finish();
 }
@@ -211,6 +229,18 @@ sub top_ten_attackers {
             $country = "Unknown";
         }
         printf( "* %-05.10s %-17s %-17.25s %s\n", $count, $source_ip, $country, $hostname );
+    }
+    $sth->finish();
+}
+
+sub top_ten_files {
+    my $sth = $dbh->prepare("SELECT filename, COUNT(filename) FROM events WHERE filename is not null GROUP BY filename ORDER BY COUNT(filename) DESC LIMIT 10");
+    $sth->execute();
+
+    while ( my @data = $sth->fetchrow_array() ) {
+        my $file = $data[0];
+        my $count = $data[1];
+        printf( "* %6d %s\n", $count, $file );
     }
     $sth->finish();
 }

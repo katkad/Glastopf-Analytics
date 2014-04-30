@@ -19,13 +19,15 @@ root@honeypot:~# perl glastopf-analytics.pl
 * What to do?
 *
 * 1) Show last 10 events
-* 2) Show top 10 countries
-* 3) Show top 10 user-agents
-* 4) Show top 10 event patterns
-* 5) Show top 10 requested filetypes
-* 6) Show top 10 attackers
-* 7) Delete IP address from events
-* 8) Exit
+* 2) Show last 10 files
+* 3) Show top 10 countries
+* 4) Show top 10 user-agents
+* 5) Show top 10 event patterns
+* 6) Show top 10 requested filetypes
+* 7) Show top 10 attackers
+* 8) Show top 10 files
+* 9) Delete IP address from events
+* 10) Exit
 *
-* Enter number of your choice (1-8):
+* Enter number of your choice (1-10):
 ```
