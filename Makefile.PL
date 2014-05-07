@@ -8,10 +8,10 @@ my $eumm_version = $ExtUtils::MakeMaker::VERSION;
 $eumm_version =~ s/_//;
 
 WriteMakefile(
-    NAME                => 'MyWeb::App',
-    AUTHOR              => q{YOUR NAME <youremail@example.com>},
+    NAME                => 'Glastopf-Analytics',
+    AUTHOR              => q{Kamil Vavra <vavkamil@gmail.com>},
     VERSION_FROM        => 'lib/MyWeb/App.pm',
-    ABSTRACT            => 'YOUR APPLICATION ABSTRACT',
+    ABSTRACT            => 'easy honeypot statistics',
     ($eumm_version >= 6.3001
       ? ('LICENSE'=> 'perl')
       : ()),
