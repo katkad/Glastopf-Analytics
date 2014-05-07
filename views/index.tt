@@ -63,7 +63,7 @@
           <h1>Getting started</h1>
           <h2><% test %></h2>
                     
-          <h3><a href="#" id="about_env_link">About your application's environment</a></h3>
+          <h3><a href="#" id="about_env_link">Info about your honeypot environment</a></h3>
 
           <div id="about-content" style="display: none;">
             <table>
@@ -112,34 +112,28 @@
 
           <ol>          
             <li>
-              <h2>Tune your application</h2>
+              <h2>Thank you for using glastopf honeypot</h2>
 
               <p>
-              Your application is configured via a global configuration file,
-              <tt>config.yml</tt> and an "environment" configuration file,
-              <tt>environments/development.yml</tt>. Edit those files if you
-              want to change the settings of your application.
+              We recommended running glastopf using this command:<br>
+              <strong>screen -dmS honeypot cd /opt/myhoneypot && glastopf-runner</strong>
               </p>
             </li>
 
             <li>
-              <h2>Add your own routes</h2>
+              <h2>Graphs & analytics</h2>
 
               <p>
-              The default route that displays this page can be removed,
-              it's just here to help you get started. The template used to
-              generate this content is located in 
-              <code>views/index.tt</code>.
-              You can add some routes to <tt>lib/MyWeb/App.pm</tt>. 
+              My goal is to make data mining more accessible and offer the most available informations about your honeypot. 
               </p>
             </li>
 
             <li>
-                <h2>Enjoy web development again</h2>
+                <h2>Enjoy opensource development</h2>
 
                 <p>
-                Once you've made your changes, restart your standalone server
-                (bin/app.pl) and you're ready to test your web application.
+                If you love Perl and want to help, fork me on <a href="https://github.com/vavkamil/Glastopf-Analytics">GitHub</a><br>
+                Feedbacks or suggestions please send to: <tt>vavkamil@gmail.com</tt>
                 </p>
             </li>
 

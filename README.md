@@ -8,10 +8,14 @@ This Perl script provides simple statistics for the Glastopf. While accessing de
 
 #### Usage
 
-First edit patch to glastopf database in /bin/app.pl at line 9:
+First edit path to glastopf database in ./lib/MyWeb/App.pm at line 9:
 
 set 'database'  =>  '/opt/myhoneypot/db/glastopf.db';
 
 ```
 root@honeypot:~/Glastopf-Analytics$ perl ./bin/app.pl
 ```
+
+#### Example
+
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/WSRGPYnC73A/0.jpg)](http://www.youtube.com/watch?v=WSRGPYnC73A)

@@ -7,7 +7,7 @@ use DBI;
 
 our $VERSION = '0.1';
 
-set 'database'  =>  '/home/qqvavra2/glastopf.db';
+set 'database'  =>  '/root/glastopf.db';
 
 sub connect_db {
     my $dbh = DBI->connect("dbi:SQLite:dbname=".setting('database')) or die $DBI::errstr;
