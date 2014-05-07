@@ -31,6 +31,10 @@ get '/top-files' => sub {
         $files.= "$count
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $file
+                    <br>
+                    <a href=\"https://www.virustotal.com/search/?query=$file\" target=\"_blank\">Search on virustotal.com</a>
+                    <br>
+                    <a href=\"https://defense.ballastsecurity.net/decoding/?raw=$file\" target=\"_blank\">Search on defense.ballastsecurity.net</a>
                     <br><br>";
         }
     $sth->finish();
@@ -52,6 +56,10 @@ get '/last-files' => sub {
         $files.= "$time
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $file
+                    <br>
+                    <a href=\"https://www.virustotal.com/search/?query=$file\" target=\"_blank\">Search on virustotal.com</a>
+                    <br>
+                    <a href=\"https://defense.ballastsecurity.net/decoding/?raw=$file\" target=\"_blank\">Search on defense.ballastsecurity.net</a>
                     <br><br>";
         }
     $sth->finish();
