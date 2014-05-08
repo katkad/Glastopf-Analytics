@@ -16,14 +16,14 @@
           <li>
             <h3>Command center</h3>
             <ul class="links">
-              <li><a href="top-files">Show top files</a></li>
-              <li><a href="last-files">Show last files</a></li>
-              <li><a href="last-events">Show last events</a></li>
-              <li><a href="top-visitors">Show top visitors</a></li>
-              <li><a href="top-countries">Show top countries</a></li>
-              <li><a href="top-user-agents">Show top user-agents</a></li>
-              <li><a href="top-event-patterns">Show top event patterns</a></li>
-              <li><a href="top-requested-filetypes">Show top requested filetypes</a></li>
+              <li><a href="/top-files">Show top files</a></li>
+              <li><a href="/last-files">Show last files</a></li>
+              <li><a href="/last-events">Show last events</a></li>
+              <li><a href="/top-visitors">Show top visitors</a></li>
+              <li><a href="/top-countries">Show top countries</a></li>
+              <li><a href="/top-user-agents">Show top user-agents</a></li>
+              <li><a href="/top-event-patterns">Show top event patterns</a></li>
+              <li><a href="/top-requested-filetypes">Show top requested filetypes</a></li>
             </ul>
           </li>
           
@@ -61,7 +61,12 @@
 
         <div id="getting-started">
           <h1>Top visitors</h1>
-          <h2>Here&rsquo;s how to get dancing:</h2>
+          <h2>Showing top <% limit %> visitors</h2>
+          <form action="<% add_entry_url %>" method=get class=add-entry>
+              Limit:
+              <input type=text size=5 name=limit value=<% limit %>>
+              <input type=submit value=Show>
+          </form><br>
           <% visitors %>
         </div>
       </div>

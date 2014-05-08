@@ -19,8 +19,10 @@ get '/' => sub {
 };
 
 get '/top-files' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT COUNT(filename), filename FROM events WHERE filename is not null GROUP BY filename ORDER BY COUNT(filename) DESC LIMIT 10';
+    my $sql = 'SELECT COUNT(filename), filename FROM events WHERE filename is not null GROUP BY filename ORDER BY COUNT(filename) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -39,13 +41,16 @@ get '/top-files' => sub {
         }
     $sth->finish();
     template 'top-files.tt', {
-        files => $files
+        files => $files,
+        limit  => $limit
     };
 };
 
 get '/last-files' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT time, filename FROM events WHERE filename is not null ORDER BY time DESC LIMIT 10';
+    my $sql = 'SELECT time, filename FROM events WHERE filename is not null ORDER BY time DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -64,13 +69,16 @@ get '/last-files' => sub {
         }
     $sth->finish();
     template 'last-files.tt', {
-        files => $files
+        files => $files,
+        limit  => $limit
     };
 };
 
 get '/last-events' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT 10';
+    my $sql = 'SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -110,13 +118,16 @@ get '/last-events' => sub {
         }
     $sth->finish();
     template 'last-events.tt', {
-        events => $events
+        events  => $events,
+        limit  => $limit
     };
 };
 
 get '/top-visitors' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT COUNT(source), SUBSTR(source,-20,14) AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT 10';
+    my $sql = 'SELECT COUNT(source), SUBSTR(source,-20,14) AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -140,7 +151,7 @@ get '/top-visitors' => sub {
         else {
             $country = "Unknown country";
         }
-        $visitors.= "$count
+        $visitors.= "$count hits
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $source_ip
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -153,11 +164,14 @@ get '/top-visitors' => sub {
         }
     $sth->finish();
     template 'top-visitors.tt', {
-        visitors => $visitors
+        visitors => $visitors,
+        limit  => $limit
     };
 };
 
 get '/top-countries' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT SUBSTR(source,-20,14) FROM events';
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -181,12 +195,12 @@ get '/top-countries' => sub {
             $countries{$country}++;
         }
     }
-    my $i = 0;
+    my $i = "0";
     foreach my $country ( sort { $countries{$b} <=> $countries{$a}; } keys %countries ) {
-        if ( $i == 10 ) { last(); }
+        if ( $i eq $limit ) { last(); }
         $countries.= "<img src='/images/flags/flags_style4_tiny/$country_codes{$country}.png'>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    $countries{$country}
+                    $countries{$country} hits
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $country
                     <br><br>";
@@ -194,11 +208,14 @@ get '/top-countries' => sub {
     }
     $sth->finish();
     template 'top-countries.tt', {
-        countries => $countries
+        countries => $countries,
+        limit  => $limit
     };
 };
 
 get '/top-user-agents' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT request_raw FROM events';
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -214,10 +231,10 @@ get '/top-user-agents' => sub {
             $seen{$user_agent}{agent} = $user_agent;
         }
     }
-    my $i = 0;
+    my $i = "0";
     for my $key ( sort { $seen{$b}->{count} <=> $seen{$a}->{count} } keys %seen ) {
-        if ( $i == 10 ) { last(); }
-        $agents.= "$seen{$key}{count}
+        if ( $i eq $limit ) { last(); }
+        $agents.= "$seen{$key}{count} hits
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $seen{$key}{agent}
                     <br><br>";
@@ -225,13 +242,16 @@ get '/top-user-agents' => sub {
     }
     $sth->finish();
     template 'top-user-agents.tt', {
-        agents => $agents
+        agents => $agents,
+        limit  => $limit
     };
 };
 
 get '/top-event-patterns' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT 10';
+    my $sql = 'SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -239,20 +259,20 @@ get '/top-event-patterns' => sub {
     while ( my @data = $sth->fetchrow_array() ) {
         my $count   = $data[0];
         my $pattern = $data[1];
-        $patterns.= "$count
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    $pattern
-                    <br><br>";
+        $patterns.= "<tr><td align=\"right\">$count</td><td style=\"padding-left:20px;\">$pattern</td></tr>";
     }
     $sth->finish();
     template 'top-event-patterns.tt', {
-        patterns => $patterns
+        patterns => $patterns,
+        limit  => $limit
     };
 };
 
 get '/top-requested-filetypes' => sub {
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT count, content FROM filetype ORDER BY count DESC LIMIT 10';
+    my $sql = 'SELECT count, content FROM filetype ORDER BY count DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -260,14 +280,12 @@ get '/top-requested-filetypes' => sub {
     while ( my @data = $sth->fetchrow_array() ) {
         my $count   = $data[0];
         my $filetype = $data[1];
-        $filetypes.= "$count
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    $filetype
-                    <br><br>";
+        $filetypes.= "<tr><td align=\"right\">$count</td><td style=\"padding-left:20px;\">$filetype</td></tr>";
     }
     $sth->finish();
     template 'top-requested-filetypes.tt', {
-        filetypes => $filetypes
+        filetypes => $filetypes,
+        limit  => $limit
     };
 };
 
