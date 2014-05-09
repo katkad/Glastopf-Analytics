@@ -1,13 +1,11 @@
-
 body {
 margin: 0;
 margin-bottom: 25px;
 padding: 0;
 background-color: #ddd;
-background-image: url("/images/perldancer-bg.jpg");
+background-image: url("/images/honeybee-bg.jpg");
 background-repeat: no-repeat;
 background-position: top left;
-
 font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
 font-size: 13px;
 color: #333;
@@ -54,7 +52,7 @@ padding-right: 30px;
 
 
 #header {
-background-image: url("/images/perldancer.jpg");
+background-image: url("/images/logo.jpg");
 background-repeat: no-repeat;
 background-position: top left;
 height: 64px;
@@ -71,7 +69,6 @@ font-size: 16px;
 #header a:visited {text-decoration: none} 
 #header a:active {text-decoration: none} 
 #header a:hover {text-decoration: none;}
-
 
 #about h3 {
 margin: 0;
@@ -183,7 +180,7 @@ margin: 1.6em 0;
 }
 
 code, tt {
-    font-family: 'Andale Mono', Monaco, 'Liberation Mono', 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', monospace;
+    font-family: 'Andale Mono', 'Monaco', 'Liberation Mono', 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', monospace;
 }
 
 #footer {

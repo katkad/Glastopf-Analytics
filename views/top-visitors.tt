@@ -64,7 +64,9 @@
           <h2>Showing top <% limit %> visitors</h2>
           <form action="<% add_entry_url %>" method=get class=add-entry>
               Limit:
-              <input type=text size=5 name=limit value=<% limit %>>
+              <input type=text size=5 name=limit value=<% limit %>><br>
+              Show hostnames:
+              <input type=checkbox name=hostnames <% checked %>><br>
               <input type=submit value=Show>
           </form><br>
           <% visitors %>

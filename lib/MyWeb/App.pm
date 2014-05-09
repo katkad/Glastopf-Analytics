@@ -7,7 +7,7 @@ use DBI;
 
 our $VERSION = '0.1';
 
-set 'database'  =>  '/root/glastopf.db';
+set 'database'  =>  '/home/qqvavra2/glastopf.db';
 
 sub connect_db {
     my $dbh = DBI->connect("dbi:SQLite:dbname=".setting('database')) or die $DBI::errstr;
@@ -126,6 +126,9 @@ get '/last-events' => sub {
 get '/top-visitors' => sub {
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
+    my $hostnames = params->{'hostnames'};
+    my $checked;
+    if ( defined($hostnames) ) { $checked = "checked"; } else { $checked = ""; }
     my $db = connect_db();
     my $sql = 'SELECT COUNT(source), SUBSTR(source,-20,14) AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -138,11 +141,17 @@ get '/top-visitors' => sub {
         my $gi              = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country         = $gi->country_name_by_addr($source_ip);
         my $country_code    = $gi->country_code_by_addr($source_ip);
-        my $hostname        = gethostbyaddr( inet_aton($source_ip), AF_INET );
-        if ( defined($hostname) ) {
-            # TODO: rewrite this
+        my $hostname;
+        if ( defined($hostnames) ) {
+            $hostname = gethostbyaddr( inet_aton($source_ip), AF_INET );
+            if ( defined($hostname) ) {
+                 # TODO: rewrite this
+            }
+            else {
+                $hostname = "Unknown hostname";
+            }
         }
-        else {
+        else { 
             $hostname = "Unknown hostname";
         }
         if ( defined($country) ) {
@@ -165,7 +174,8 @@ get '/top-visitors' => sub {
     $sth->finish();
     template 'top-visitors.tt', {
         visitors => $visitors,
-        limit  => $limit
+        limit  => $limit,
+        checked  => $checked
     };
 };
 
@@ -193,6 +203,7 @@ get '/top-countries' => sub {
         else {
             $country = "Unknown country";
             $countries{$country}++;
+            $country_codes{$country} = "unknown";
         }
     }
     my $i = "0";
