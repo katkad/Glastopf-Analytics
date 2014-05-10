@@ -9,6 +9,7 @@ our $VERSION = '2.0';
 set 'database'  =>  '/root/glastopf.db';
 set 'username'  =>  'admin';
 set 'password'  =>  'password';
+set 'comments'  =>  '/root/comments.txt';
 
 sub connect_db {
     my $dbh = DBI->connect("dbi:SQLite:dbname=".setting('database')) or die $DBI::errstr;
@@ -259,6 +260,32 @@ get '/top-countries' => sub {
     template 'top-countries.tt', {
         countries => $countries,
         limit  => $limit
+    };
+};
+
+get '/last-comments' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
+    my $limit = params->{'limit'};
+    if ( defined($limit) ) { } else { $limit = "2"; }
+	open(FILE, setting('comments')) or die "Could not open comments file.";
+	my @array;
+	while(<FILE>) {
+		push (@array, $_);
+	}
+	close FILE;
+
+	my $i = "0";
+	my $comments;
+	for (reverse @array) {
+		if ( $i eq $limit ) { last(); }
+		$comments.= "$_<br><hr><br>";
+		$i++;
+	}
+    template 'last-comments.tt', {
+        comments => $comments,
+        limit    => $limit
     };
 };
 
