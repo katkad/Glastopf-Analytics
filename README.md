@@ -8,9 +8,11 @@ This Perl script provides simple statistics for the Glastopf. While accessing de
 
 #### Requirements
 
-DBI - Database independent interface for Perl (apt-get install libcpan-sqlite-perl)
-Dancer2 - Lightweight yet powerful web application framework
-Geo::IP - Look up location and network information by IP Address (apt-get install libgeo-ip-perl)
+DBI - apt-get install libcpan-sqlite-perl
+
+Dancer2 - cpanm Dancer2
+
+Geo::IP - apt-get install libgeo-ip-perl
 
 #### Installation
 
@@ -23,7 +25,9 @@ root@honeypot::~# git clone https://github.com/vavkamil/Glastopf-Analytics.git
 First edit path to glastopf database & change username and password in ./lib/MyWeb/App.pm at lines 9-11:
 
 set 'database'  =>  '/opt/myhoneypot/db/glastopf.db';
+
 set 'username'  =>  'admin';
+
 set 'password'  =>  'password';
 
 ```
