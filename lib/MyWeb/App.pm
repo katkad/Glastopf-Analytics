@@ -6,10 +6,10 @@ use DBI;
 
 our $VERSION = '2.0';
 
-set 'database'  =>  '/root/glastopf.db';
 set 'username'  =>  'admin';
 set 'password'  =>  'password';
-set 'comments'  =>  '/root/comments.txt';
+set 'database'  =>  '/opt/myhoneypot/db/glastopf.db';
+set 'comments'  =>  '/opt/myhoneypot/data/comments.txt';
 
 sub connect_db {
     my $dbh = DBI->connect("dbi:SQLite:dbname=".setting('database')) or die $DBI::errstr;
