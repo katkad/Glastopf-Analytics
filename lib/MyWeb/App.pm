@@ -4,10 +4,11 @@ use Geo::IP;
 use Socket;
 use DBI;
 
+our $VERSION = '2.0';
 
-our $VERSION = '0.1';
-
-set 'database'  =>  '/home/qqvavra2/glastopf.db';
+set 'database'  =>  '/root/glastopf.db';
+set 'username'  =>  'admin';
+set 'password'  =>  'password';
 
 sub connect_db {
     my $dbh = DBI->connect("dbi:SQLite:dbname=".setting('database')) or die $DBI::errstr;
@@ -15,10 +16,35 @@ sub connect_db {
 }
 
 get '/' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
+	set layout => 'main';
     template 'index.tt';
 };
 
+any ['get', 'post'] => '/login' => sub {
+	my $err;
+	set layout => 'login';
+	if ( request->method() eq "POST" ) {
+		if ( params->{'username'} eq setting('username') && params->{'password'} eq setting('password') ) {
+			session 'logged_in' => true;
+			return redirect '/';
+		}
+	}
+	# display login form
+	template 'login.tt';
+};
+
+get '/logout' => sub {
+	session->delete('logged_in');
+	return redirect '/login';
+};
+
 get '/top-files' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -47,6 +73,9 @@ get '/top-files' => sub {
 };
 
 get '/last-files' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -75,6 +104,9 @@ get '/last-files' => sub {
 };
 
 get '/last-events' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -124,6 +156,9 @@ get '/last-events' => sub {
 };
 
 get '/top-visitors' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $hostnames = params->{'hostnames'};
@@ -180,6 +215,9 @@ get '/top-visitors' => sub {
 };
 
 get '/top-countries' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -225,6 +263,9 @@ get '/top-countries' => sub {
 };
 
 get '/top-user-agents' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -259,6 +300,9 @@ get '/top-user-agents' => sub {
 };
 
 get '/top-event-patterns' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();
@@ -280,6 +324,9 @@ get '/top-event-patterns' => sub {
 };
 
 get '/top-requested-filetypes' => sub {
+	if ( not session('logged_in') ) {
+		return redirect '/login';
+	}
     my $limit = params->{'limit'};
     if ( defined($limit) ) { } else { $limit = "10"; }
     my $db = connect_db();

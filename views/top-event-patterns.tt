@@ -37,14 +37,9 @@
           </li>
 
           <li>
-            <h3>Your application's environment</h3>
+            <h3>Log out</h3>
 
-            <ul>
-                <li>Location: <code>/root/dancer/MyWeb-App</code></li>
-                <li>Template engine: <code><% settings.template %></code></li>
-                <li>Logger: <code><% settings.logger %></code></li>
-                <li>Environment: <code><% settings.environment %></code></li>
-            </ul>
+            <a href="/logout">Click here to logout</a>
 
           </li>
         </ul>
