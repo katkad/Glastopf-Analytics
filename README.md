@@ -36,4 +36,4 @@ root@honeypot:~/Glastopf-Analytics$ perl ./bin/app.pl
 
 #### Example
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/WSRGPYnC73A/0.jpg)](http://www.youtube.com/watch?v=WSRGPYnC73A)
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/NuucT_l8Nhg/0.jpg)](http://www.youtube.com/watch?v=NuucT_l8Nhg)
