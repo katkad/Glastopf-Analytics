@@ -111,8 +111,10 @@
               <h2>Thank you for using glastopf honeypot</h2>
 
               <p>
-              We recommended running glastopf using this command:<br>
-              <strong>TODO: add command</strong>
+              We recommend running glastopf using this commands:<br>
+              <strong>cd /opt/glastopf-runner/<br>
+                      nohup glastopf-runner &</strong><br>
+                this way you will see Traceback in case of error in nohup.out
               </p>
             </li>
 
