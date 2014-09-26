@@ -47,7 +47,7 @@ get '/top-files' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT COUNT(filename), filename FROM events WHERE filename is not null GROUP BY filename ORDER BY COUNT(filename) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -78,7 +78,7 @@ get '/last-files' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT time, filename FROM events WHERE filename is not null ORDER BY time DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -109,7 +109,7 @@ get '/last-events' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -121,21 +121,11 @@ get '/last-events' => sub {
         my $request_url     =   $data[1];
         my $source_ip		=	$data[2];
         my $gi          	=	Geo::IP->new(GEOIP_MEMORY_CACHE);
-        my $country         =   $gi->country_name_by_addr($source_ip);
+        my $country         =   $gi->country_name_by_addr($source_ip)
+                                    // "Unknown country";
         my $country_code	=	$gi->country_code_by_addr($source_ip);
-        my $hostname		=	gethostbyaddr( inet_aton($source_ip), AF_INET );
-        if ( defined($hostname) ) {
-            # TODO: rewrite this
-        }
-        else {
-            $hostname = "Unknown hostname";
-        }
-        if ( defined($country) ) {
-            # TODO: rewrite this
-        }
-        else {
-            $country = "Unknown country";
-        }
+        my $hostname		=	gethostbyaddr( inet_aton($source_ip), AF_INET )
+                                    // "Unknown hostname";
         $events.= "$time
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     $source_ip
@@ -161,7 +151,7 @@ get '/top-visitors' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $hostnames = params->{'hostnames'};
     my $checked;
     if ( defined($hostnames) ) { $checked = "checked"; } else { $checked = ""; }
@@ -171,30 +161,18 @@ get '/top-visitors' => sub {
     $sth->execute or die $sth->errstr;
 
     my $visitors;
+    my $hostname_default = "Unknown hostname";
     while ( my @data = $sth->fetchrow_array() ) {
         my $count           = $data[0];
         my $source_ip       = $data[1];
         my $gi              = Geo::IP->new(GEOIP_MEMORY_CACHE);
-        my $country         = $gi->country_name_by_addr($source_ip);
+        my $country         = $gi->country_name_by_addr($source_ip)
+                                // "Unknown country";
         my $country_code    = $gi->country_code_by_addr($source_ip);
-        my $hostname;
+        my $hostname        = $hostname_default;
         if ( defined($hostnames) ) {
-            $hostname = gethostbyaddr( inet_aton($source_ip), AF_INET );
-            if ( defined($hostname) ) {
-                 # TODO: rewrite this
-            }
-            else {
-                $hostname = "Unknown hostname";
-            }
-        }
-        else { 
-            $hostname = "Unknown hostname";
-        }
-        if ( defined($country) ) {
-            # TODO: rewrite this
-        }
-        else {
-            $country = "Unknown country";
+            $hostname = gethostbyaddr( inet_aton($source_ip), AF_INET )
+                            // $hostname_default;
         }
         $visitors.= "$count hits
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -220,7 +198,7 @@ get '/top-countries' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT SUBSTR(source,-20,14) FROM events';
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -236,14 +214,13 @@ get '/top-countries' => sub {
         my $country         = $gi->country_name_by_addr($source_ip);
         my $country_code    = $gi->country_code_by_addr($source_ip);
         if ( defined($country) ) {
-            $countries{$country}++;
             $country_codes{$country} = $country_code;
         }
         else {
             $country = "Unknown country";
-            $countries{$country}++;
             $country_codes{$country} = "unknown";
         }
+        $countries{$country}++;
     }
     my $i = "0";
     foreach my $country ( sort { $countries{$b} <=> $countries{$a}; } keys %countries ) {
@@ -268,7 +245,7 @@ get '/last-comments' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "2"; }
+    if ( !defined($limit) ) { $limit = "2"; }
 	open(FILE, setting('comments')) or die "Could not open comments file.";
 	my @array;
 	while(<FILE>) {
@@ -294,7 +271,7 @@ get '/top-user-agents' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT request_raw FROM events';
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -331,7 +308,7 @@ get '/top-event-patterns' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT count(pattern), pattern FROM events GROUP BY pattern ORDER BY count(pattern) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
@@ -355,7 +332,7 @@ get '/top-requested-filetypes' => sub {
 		return redirect '/login';
 	}
     my $limit = params->{'limit'};
-    if ( defined($limit) ) { } else { $limit = "10"; }
+    if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
     my $sql = 'SELECT count, content FROM filetype ORDER BY count DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
