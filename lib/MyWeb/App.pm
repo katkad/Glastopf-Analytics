@@ -111,7 +111,7 @@ get '/last-events' => sub {
     my $limit = params->{'limit'};
     if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT time, request_url, SUBSTR(source,-20,14) FROM events ORDER BY time DESC LIMIT '.$limit;
+    my $sql = 'SELECT time, request_url, source FROM events ORDER BY time DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -119,7 +119,8 @@ get '/last-events' => sub {
     while ( my @data = $sth->fetchrow_array() ) {
         my $time			=	$data[0];
         my $request_url     =   $data[1];
-        my $source_ip		=	$data[2];
+        my @ip_and_port     =   split(':', $data[2]);
+        my $source_ip       =   $ip_and_port[0];
         my $gi          	=	Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country         =   $gi->country_name_by_addr($source_ip)
                                     // "Unknown country";
@@ -156,7 +157,7 @@ get '/top-visitors' => sub {
     my $checked;
     if ( defined($hostnames) ) { $checked = "checked"; } else { $checked = ""; }
     my $db = connect_db();
-    my $sql = 'SELECT COUNT(source), SUBSTR(source,-20,14) AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT '.$limit;
+    my $sql = 'SELECT COUNT(source), source AS stripped FROM events GROUP BY stripped ORDER BY COUNT(stripped) DESC LIMIT '.$limit;
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -164,7 +165,8 @@ get '/top-visitors' => sub {
     my $hostname_default = "Unknown hostname";
     while ( my @data = $sth->fetchrow_array() ) {
         my $count           = $data[0];
-        my $source_ip       = $data[1];
+        my @ip_and_port     = split(':', $data[1]);
+        my $source_ip       = $ip_and_port[0];
         my $gi              = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country         = $gi->country_name_by_addr($source_ip)
                                 // "Unknown country";
@@ -200,7 +202,7 @@ get '/top-countries' => sub {
     my $limit = params->{'limit'};
     if ( !defined($limit) ) { $limit = "10"; }
     my $db = connect_db();
-    my $sql = 'SELECT SUBSTR(source,-20,14) FROM events';
+    my $sql = 'SELECT source FROM events';
     my $sth = $db->prepare($sql) or die $db->errstr;
     $sth->execute or die $sth->errstr;
 
@@ -209,7 +211,8 @@ get '/top-countries' => sub {
     my $country_code;
     my %country_codes;
     while ( my @data = $sth->fetchrow_array() ) {
-        my $source_ip       = $data[0];
+        my @ip_and_port     = split(':', $data[0]);
+        my $source_ip       = $ip_and_port[0];
         my $gi              = Geo::IP->new(GEOIP_MEMORY_CACHE);
         my $country         = $gi->country_name_by_addr($source_ip);
         my $country_code    = $gi->country_code_by_addr($source_ip);
